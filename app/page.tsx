@@ -7,7 +7,7 @@ import SocialLogin from "@/app/components/social-login";
 export default function Home() {
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-900 via-purple-900 to-violet-900">
+    <div className="min-h-screen bg-linear-to-br from-gray-950 via-gray-900 to-gray-950">
       {/* Navigation */}
       <header>
         <nav className="fixed top-0 w-full bg-black/20 backdrop-blur-lg border-b border-white/10 z-50">
@@ -37,7 +37,7 @@ export default function Home() {
             <div className="text-center">
               <h1 className="text-5xl sm:text-6xl md:text-7xl font-extrabold text-white mb-6">
                 Websites Made{" "}
-                <span className="bg-linear-to-r from-purple-400 to-pink-600 text-transparent bg-clip-text">
+                <span className="bg-linear-to-r from-blue-500 to-cyan-400 text-transparent bg-clip-text">
                   Beautiful
                 </span>
               </h1>
@@ -69,7 +69,7 @@ export default function Home() {
             <section id="features" className="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8">
               <Card className="bg-white/5 backdrop-blur-lg border border-white/10 hover:bg-white/10 transition-all">
                 <CardHeader className="flex-col items-start">
-                  <div className="w-12 h-12 bg-linear-to-br from-purple-500 to-pink-500 rounded-lg mb-4 flex items-center justify-center">
+                  <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-blue-600 rounded-lg mb-4 flex items-center justify-center">
                     <Icon icon="mdi:lightning-bolt" className="w-6 h-6 text-white" />
                   </div>
                   <h3 className="text-xl font-bold text-white mb-2">Lightning Fast</h3>
