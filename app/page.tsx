@@ -2,6 +2,7 @@ import { Button, Card, CardHeader, CardDescription, CardContent } from "@heroui/
 import {Icon} from "@iconify/react";
 
 import NextLink from 'next/link';
+import SocialLogin from "@/app/components/social-login";
 
 export default function Home() {
 
@@ -22,10 +23,7 @@ export default function Home() {
                 <NextLink href="#pricing" className="text-white hover:text-gray-300 transition-colors">
                   Pricing
                 </NextLink>
-               <Button className="w-full" variant="primary">
-                  <Icon icon="mdi:github" />
-                  Sign in with GitHub
-                </Button>
+               <SocialLogin />
               </div>
             </div>
           </div>
