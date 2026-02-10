@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database (for local development/testing)
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: dental_user
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: dental_compliance
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dental_user"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - dental-network
+
+  # Next.js Application
+  nextjs:
+    build:
+      context: .
+      dockerfile: Dockerfile.nextjs
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://dental_user:${DATABASE_PASSWORD}@postgres:5432/dental_compliance
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL}
+      R2_ENDPOINT: ${R2_ENDPOINT}
+      R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
+      R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
+      R2_BUCKET_NAME: ${R2_BUCKET_NAME}
+      FASTAPI_URL: http://fastapi:8000
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - dental-network
+
+  # FastAPI Microservice (Phase 4 - disabled for now)
+  # fastapi:
+  #   build:
+  #     context: ./apps/fastapi
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     DATABASE_URL: postgresql://dental_user:${DATABASE_PASSWORD}@postgres:5432/dental_compliance
+  #     R2_ENDPOINT: ${R2_ENDPOINT}
+  #     R2_ACCESS_KEY_ID: ${R2_ACCESS_KEY_ID}
+  #     R2_SECRET_ACCESS_KEY: ${R2_SECRET_ACCESS_KEY}
+  #     R2_BUCKET_NAME: ${R2_BUCKET_NAME}
+  #   depends_on:
+  #     - postgres
+  #   volumes:
+  #     - ./apps/fastapi:/app
+  #   command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+  #   networks:
+  #     - dental-network
+
+  # Cron Service (Phase 3 - disabled for now)
+  # cron:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.cron
+  #   environment:
+  #     DATABASE_URL: postgresql://dental_user:${DATABASE_PASSWORD}@postgres:5432/dental_compliance
+  #     NEXTJS_URL: http://nextjs:3000
+  #     CRON_SECRET: ${CRON_SECRET}
+  #   depends_on:
+  #     - postgres
+  #     - nextjs
+  #   volumes:
+  #     - ./cron:/app
+  #   networks:
+  #     - dental-network
+
+volumes:
+  postgres_data:
+
+networks:
+  dental-network:
+    driver: bridge
