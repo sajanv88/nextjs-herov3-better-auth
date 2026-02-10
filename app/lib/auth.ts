@@ -22,25 +22,27 @@ export const auth = betterAuth({
 		requireEmailVerification: false, // Set to true in production with email service
 	},
 
-	// Social providers
-	socialProviders: {
-		github: {
-			clientId: process.env.GITHUB_CLIENT_ID || "",
-			clientSecret: process.env.GITHUB_CLIENT_SECRET || "",
-		},
-		google: {
-			clientId: process.env.GOOGLE_CLIENT_ID || "",
-			clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
-		},
-	},
-
 	// Organization plugin for multi-tenancy
 	plugins: [
 		organization({
-			// Auto-create Practice when Organization is created
 			async sendInvitationEmail(data) {
 				// TODO: Implement email sending in Phase 3
 				console.log("Invitation email:", data.email);
+			},
+			organizationHooks: {
+				// Auto-create Practice when Organization is created
+				async afterCreateOrganization({ organization }) {
+					await prisma.practice.create({
+						data: {
+							organizationId: organization.id,
+							countryCode: "GB", // Default to UK, can be updated later
+							subscriptionTier: "starter",
+						},
+					});
+					console.log(
+						`Practice created for organization: ${organization.name}`,
+					);
+				},
 			},
 		}),
 	],

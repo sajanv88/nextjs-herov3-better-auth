@@ -8,7 +8,6 @@ import {
 import { Icon } from "@iconify/react";
 
 import NextLink from "next/link";
-import SocialLogin from "@/app/components/social-login";
 
 export default function Home() {
 	return (
@@ -34,7 +33,9 @@ export default function Home() {
 								>
 									Pricing
 								</NextLink>
-								<SocialLogin />
+								<NextLink href="/login">
+									<Button variant="primary">Sign In</Button>
+								</NextLink>
 							</div>
 						</div>
 					</div>
