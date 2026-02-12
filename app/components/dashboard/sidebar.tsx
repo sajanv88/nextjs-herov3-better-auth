@@ -1,11 +1,10 @@
 "use client";
 
+import { Button } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import NextLink from "next/link";
-import { usePathname } from "next/navigation";
-import { Button } from "@heroui/react";
+import { usePathname, useRouter } from "next/navigation";
 import { authClient } from "@/app/lib/auth-client";
-import { useRouter } from "next/navigation";
 
 /**
  * Dashboard Sidebar Navigation
@@ -26,46 +25,46 @@ const navItems: NavItem[] = [
 		icon: "mdi:view-dashboard",
 	},
 	{
-		label: "Staff",
-		href: "/dashboard/staff",
+		label: "Staffs",
+		href: "/staffs",
 		icon: "mdi:account-group",
 		roles: ["owner", "manager"],
 	},
 	{
 		label: "Training Matrix",
-		href: "/dashboard/training",
+		href: "/training",
 		icon: "mdi:certificate",
 	},
 	{
 		label: "Certificates",
-		href: "/dashboard/certificates",
+		href: "/certificates",
 		icon: "mdi:file-certificate",
 	},
 	{
 		label: "Tasks",
-		href: "/dashboard/tasks",
+		href: "/tasks",
 		icon: "mdi:clipboard-check",
 	},
 	{
 		label: "HTM Logs",
-		href: "/dashboard/htm-logs",
+		href: "/htm-logs",
 		icon: "mdi:clipboard-text",
 	},
 	{
 		label: "Policies",
-		href: "/dashboard/policies",
+		href: "/policies",
 		icon: "mdi:file-document",
 		roles: ["owner", "manager"],
 	},
 	{
 		label: "Reports",
-		href: "/dashboard/reports",
+		href: "/reports",
 		icon: "mdi:chart-line",
 		roles: ["owner", "manager"],
 	},
 	{
 		label: "Settings",
-		href: "/dashboard/settings",
+		href: "/settings",
 		icon: "mdi:cog",
 		roles: ["owner"],
 	},

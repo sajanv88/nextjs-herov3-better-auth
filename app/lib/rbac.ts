@@ -3,9 +3,9 @@
  * Enforces multi-tenant isolation and role-based permissions
  */
 
+import { headers } from "next/headers";
 import { auth } from "@/app/lib/auth";
 import { prisma } from "@/app/lib/prisma";
-import { headers } from "next/headers";
 
 /**
  * Role definitions for dental compliance system
@@ -51,9 +51,7 @@ export async function requireRole(allowedRoles: Role[]) {
 	}
 
 	if (!allowedRoles.includes(member.role as Role)) {
-		throw new Error(
-			`Forbidden - Requires one of: ${allowedRoles.join(", ")}`,
-		);
+		throw new Error(`Forbidden - Requires one of: ${allowedRoles.join(", ")}`);
 	}
 
 	// Get practice ID for multi-tenant filtering
@@ -83,12 +81,10 @@ export const can = {
 	manageBilling: (role: Role) => role === Roles.OWNER,
 
 	// Owners and managers can manage staff
-	manageStaff: (role: Role) =>
-		role === Roles.OWNER || role === Roles.MANAGER,
+	manageStaff: (role: Role) => role === Roles.OWNER || role === Roles.MANAGER,
 
 	// Owners and managers can manage tasks
-	manageTasks: (role: Role) =>
-		role === Roles.OWNER || role === Roles.MANAGER,
+	manageTasks: (role: Role) => role === Roles.OWNER || role === Roles.MANAGER,
 
 	// All roles can complete tasks (but nurses only their assigned ones)
 	completeTasks: (role: Role) => true,
@@ -105,8 +101,7 @@ export const can = {
 		role === Roles.OWNER || role === Roles.MANAGER,
 
 	// Owners and managers can view audit logs
-	viewAuditLogs: (role: Role) =>
-		role === Roles.OWNER || role === Roles.MANAGER,
+	viewAuditLogs: (role: Role) => role === Roles.OWNER || role === Roles.MANAGER,
 
 	// Only owners can manage cron schedules
 	manageCron: (role: Role) => role === Roles.OWNER,
