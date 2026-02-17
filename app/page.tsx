@@ -148,7 +148,7 @@ export default function Home() {
 			{/* Footer */}
 			<footer className="border-t border-white/10 py-8 px-4 mt-20">
 				<div className="max-w-7xl mx-auto text-center text-gray-400">
-					<p>&copy; 2025 ACME. All rights reserved.</p>
+					<p>&copy; 2026 ACME. All rights reserved.</p>
 				</div>
 			</footer>
 		</div>

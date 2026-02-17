@@ -1,10 +1,11 @@
 /**
  * Better Auth Configuration
- * Multi-tenant dental compliance SaaS with organization-based RBAC
+ * Multi-tenant SaaS with organization-based RBAC
  */
 
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { nextCookies } from "better-auth/next-js";
 import { organization } from "better-auth/plugins";
 import { prisma } from "@/app/lib/prisma";
 
@@ -13,6 +14,15 @@ export const auth = betterAuth({
 		provider: "postgresql",
 	}),
 
+	baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+	basePath: "/api/auth",
+
+	session: {
+		cookieCache: {
+			enabled: true,
+			maxAge: 5 * 60, // 5 minutes
+		},
+	},
 	trustedOrigins: [process.env.BETTER_AUTH_URL || "http://localhost:3000"],
 	secret: process.env.BETTER_AUTH_SECRET,
 
@@ -26,24 +36,10 @@ export const auth = betterAuth({
 	plugins: [
 		organization({
 			async sendInvitationEmail(data) {
-				// TODO: Implement email sending in Phase 3
+				// TODO: Implement email sending in future
 				console.log("Invitation email:", data.email);
 			},
-			organizationHooks: {
-				// Auto-create Practice when Organization is created
-				async afterCreateOrganization({ organization }) {
-					await prisma.practice.create({
-						data: {
-							organizationId: organization.id,
-							countryCode: "GB", // Default to UK, can be updated later
-							subscriptionTier: "starter",
-						},
-					});
-					console.log(
-						`Practice created for organization: ${organization.name}`,
-					);
-				},
-			},
 		}),
+		nextCookies(), // Must be last plugin - automatically sets cookies in server actions
 	],
 });

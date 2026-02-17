@@ -1,8 +1,9 @@
-// Dental Compliance SaaS - Complete Prisma Schema
+// Multi-tenant SaaS - Complete Prisma Schema
 // Multi-tenant architecture with Better Auth + Organization plugin
 
 generator client {
   provider = "prisma-client-js"
+  output  = "./client"
 }
 
 datasource db {
@@ -27,8 +28,6 @@ model User {
   sessions      Session[]
   accounts      Account[]
   members       Member[]
-  auditLogs     AuditLog[]
-  completedTasks TaskInstance[] @relation("CompletedBy")
 
   @@map("user")
 }
@@ -96,7 +95,6 @@ model Organization {
   // Relations
   members     Member[]
   invitations Invitation[]
-  practice    Practice? // 1:1 relationship
 
   @@map("organization")
 }
@@ -105,7 +103,7 @@ model Member {
   id             String       @id @default(cuid())
   organizationId String
   userId         String
-  role           String       // owner, manager, nurse
+  role           String
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
 
@@ -136,273 +134,3 @@ model Invitation {
   @@map("invitation")
 }
 
-// ============================================================================
-// DENTAL COMPLIANCE DOMAIN TABLES
-// ============================================================================
-
-// Practice extends Organization with compliance-specific fields
-model Practice {
-  id                String       @id @default(uuid())
-  organizationId    String       @unique
-  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-
-  // Compliance-specific fields
-  countryCode       String       @default("GB") // GB, DE, FR, etc. for rule engine
-  subscriptionTier  String       @default("starter") // starter, professional, enterprise
-  gdcNumber         String?      // GDC registration number (UK-specific)
-  address           String?
-  postcode          String?
-  contactPhone      String?
-
-  // Metadata for future extensibility
-  complianceConfig  Json?        // Store country-specific settings
-
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-
-  // Relations
-  staff             Staff[]
-  complianceTasks   ComplianceTask[]
-  taskInstances     TaskInstance[]
-  certificates      Certificate[]
-  auditLogs         AuditLog[]
-  policyLibrary     PolicyDocument[]
-
-  @@index([countryCode])
-  @@map("practice")
-}
-
-model Staff {
-  id          String       @id @default(uuid())
-  practiceId  String
-  practice    Practice     @relation(fields: [practiceId], references: [id], onDelete: Cascade)
-
-  // Link to User (nullable - staff may not have login access)
-  userId      String?      @unique
-
-  // Staff details
-  name        String
-  role        String       // Dentist, Dental Nurse, Hygienist, Receptionist
-  email       String?
-  phone       String?
-  hireDate    DateTime
-  terminationDate DateTime?
-  isActive    Boolean      @default(true)
-
-  // GDC registration (UK-specific)
-  gdcNumber   String?
-  gdcExpiryDate DateTime?
-
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-
-  // Relations
-  certificates Certificate[]
-  assignedTasks TaskInstance[]
-
-  @@index([practiceId])
-  @@index([isActive])
-  @@map("staff")
-}
-
-model ComplianceTask {
-  id                  String       @id @default(uuid())
-  practiceId          String
-  practice            Practice     @relation(fields: [practiceId], references: [id], onDelete: Cascade)
-
-  // Task definition
-  taskType            String       // htm_01_05, training, policy_review, equipment_check
-  frequency           String       // Daily, Weekly, Monthly, Quarterly, Annual
-  title               String
-  description         String       @db.Text
-  regulationReference String?      // e.g., "HTM 01-05 Section 3.2"
-
-  // Scheduling
-  dayOfWeek           Int?         // 0-6 for weekly tasks
-  dayOfMonth          Int?         // 1-31 for monthly tasks
-  monthOfYear         Int?         // 1-12 for annual tasks
-
-  // Assignment rules
-  assignedRoles       String[]     // Which staff roles can complete this task
-
-  // Country-specific
-  countryCode         String       @default("GB")
-
-  isActive            Boolean      @default(true)
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
-
-  // Relations
-  instances           TaskInstance[]
-
-  @@index([practiceId, isActive])
-  @@index([taskType])
-  @@map("compliance_task")
-}
-
-model TaskInstance {
-  id              String       @id @default(uuid())
-  taskId          String
-  task            ComplianceTask @relation(fields: [taskId], references: [id], onDelete: Cascade)
-  practiceId      String
-  practice        Practice     @relation(fields: [practiceId], references: [id], onDelete: Cascade)
-
-  // Instance details
-  dueDate         DateTime
-  completedDate   DateTime?
-  completedBy     String?
-  completedByUser User?        @relation("CompletedBy", fields: [completedBy], references: [id])
-
-  // Assignment
-  assignedTo      String?      // staff_id
-  assignedStaff   Staff?       @relation(fields: [assignedTo], references: [id])
-
-  // Status tracking
-  status          String       @default("pending") // pending, in_progress, completed, overdue, skipped
-
-  // Evidence
-  evidenceUrls    String[]     // Cloudflare R2 URLs
-  notes           String?      @db.Text
-
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-
-  @@index([practiceId, status])
-  @@index([dueDate])
-  @@index([assignedTo])
-  @@map("task_instance")
-}
-
-model Certificate {
-  id              String       @id @default(uuid())
-  staffId         String
-  staff           Staff        @relation(fields: [staffId], references: [id], onDelete: Cascade)
-  practiceId      String
-  practice        Practice     @relation(fields: [practiceId], references: [id], onDelete: Cascade)
-
-  // Certificate details
-  certType        String       // CPD, Infection_Control, Radiography, First_Aid, etc.
-  title           String
-  issuingBody     String?
-  issueDate       DateTime?
-  expiryDate      DateTime
-
-  // File storage (Cloudflare R2)
-  fileUrl         String       // R2 pre-signed URL
-  fileSize        Int?         // bytes
-  mimeType        String?
-
-  // Status (computed from expiryDate via trigger or application logic)
-  status          String       // valid, expiring_soon, expired
-
-  // Verification
-  verifiedBy      String?      // user_id who verified
-  verifiedAt      DateTime?
-
-  // Metadata for OCR/parsing
-  metadata        Json?        // Store extracted data from FastAPI OCR
-
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-
-  @@index([practiceId, status])
-  @@index([expiryDate])
-  @@index([staffId])
-  @@map("certificate")
-}
-
-model PolicyDocument {
-  id          String       @id @default(uuid())
-  practiceId  String
-  practice    Practice     @relation(fields: [practiceId], references: [id], onDelete: Cascade)
-
-  // Document details
-  title       String
-  category    String       // Infection_Control, Health_Safety, Data_Protection, etc.
-  version     String
-  description String?      @db.Text
-
-  // File storage (Cloudflare R2)
-  fileUrl     String       // R2 URL
-  fileSize    Int?
-  mimeType    String?
-
-  // Review tracking
-  lastReviewDate   DateTime?
-  nextReviewDate   DateTime
-  reviewedBy       String?  // user_id
-
-  isActive    Boolean      @default(true)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-
-  @@index([practiceId, isActive])
-  @@index([category])
-  @@map("policy_document")
-}
-
-model AuditLog {
-  id          String       @id @default(uuid())
-  practiceId  String
-  practice    Practice     @relation(fields: [practiceId], references: [id], onDelete: Cascade)
-
-  // Actor
-  userId      String
-  user        User         @relation(fields: [userId], references: [id])
-
-  // Action details
-  action      String       // create, update, delete, complete_task, upload_certificate
-  entityType  String       // staff, task, certificate, policy
-  entityId    String       // UUID of affected entity
-
-  // Change tracking
-  changes     Json?        // Store before/after values
-
-  // Context
-  ipAddress   String?
-  userAgent   String?
-
-  timestamp   DateTime     @default(now())
-
-  @@index([practiceId, timestamp])
-  @@index([userId])
-  @@index([entityType, entityId])
-  @@map("audit_log")
-}
-
-// ============================================================================
-// RULES ENGINE (for EU expansion)
-// ============================================================================
-
-model ComplianceRule {
-  id          String       @id @default(uuid())
-  countryCode String       // GB, DE, FR, ES, etc.
-  ruleType    String       // task_frequency, certificate_requirement, audit_retention
-  ruleKey     String       // unique identifier (e.g., "htm_01_05_daily_log")
-  ruleValue   Json         // Store rule configuration
-
-  isActive    Boolean      @default(true)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-
-  @@unique([countryCode, ruleKey])
-  @@index([countryCode, isActive])
-  @@map("compliance_rule")
-}
-
-// ============================================================================
-// CRON CONFIGURATION (admin-configurable scheduling)
-// ============================================================================
-
-model CronConfig {
-  id        String   @id @default(uuid())
-  jobName   String   @unique // "generate-tasks", "expiry-notifications"
-  schedule  String   // Cron expression: "0 0 * * *"
-  isEnabled Boolean  @default(true)
-  lastRun   DateTime?
-  updatedBy String?  // user_id
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("cron_config")
-}

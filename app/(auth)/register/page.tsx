@@ -27,7 +27,7 @@ export default function RegisterPage() {
 					<h1 className="text-2xl font-bold text-white">Create Account</h1>
 				</div>
 				<p className="text-gray-400 text-sm">
-					Register your dental practice and start managing compliance
+					Register your organization and get started
 				</p>
 			</Card.Header>
 
@@ -42,21 +42,28 @@ export default function RegisterPage() {
 				)}
 
 				<Form action={formAction} className="flex flex-col gap-4">
-					<TextField name="practiceName" isRequired>
-						<Label className="text-white">Practice Name</Label>
-						<Input placeholder="e.g., London Dental Care" />
+					<TextField name="organizationName" isRequired>
+						<Label className="text-white">Organization Name</Label>
+						<Input
+							placeholder="e.g., Acme Corporation"
+							defaultValue={state?.organizationName || ""}
+						/>
 						<FieldError />
 					</TextField>
 
 					<TextField name="name" isRequired>
 						<Label className="text-white">Your Name</Label>
-						<Input placeholder="Dr. Jane Smith" />
+						<Input placeholder="Jane Smith" defaultValue={state?.name || ""} />
 						<FieldError />
 					</TextField>
 
 					<TextField name="email" type="email" isRequired>
 						<Label className="text-white">Email</Label>
-						<Input placeholder="Enter your email" autoComplete="email" />
+						<Input
+							placeholder="Enter your email"
+							autoComplete="email"
+							defaultValue={state?.email || ""}
+						/>
 						<FieldError />
 					</TextField>
 

@@ -24,9 +24,7 @@ export default function LoginPage() {
 					<Icon icon="mdi:shield-lock" className="w-8 h-8 text-blue-500" />
 					<h1 className="text-2xl font-bold text-white">Sign In</h1>
 				</div>
-				<p className="text-gray-400 text-sm">
-					Sign in to your dental compliance account
-				</p>
+				<p className="text-gray-400 text-sm">Sign in to your account</p>
 			</Card.Header>
 
 			<Card.Content>
@@ -42,7 +40,11 @@ export default function LoginPage() {
 				<Form action={formAction} className="flex flex-col gap-4">
 					<TextField name="email" type="email" isRequired>
 						<Label className="text-white">Email</Label>
-						<Input placeholder="Enter your email" autoComplete="email" />
+						<Input
+							placeholder="Enter your email"
+							autoComplete="email"
+							defaultValue={state?.email || ""}
+						/>
 						<FieldError />
 					</TextField>
 

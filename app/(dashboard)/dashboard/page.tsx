@@ -3,7 +3,7 @@ import { Icon } from "@iconify/react";
 
 /**
  * Dashboard Home Page
- * Overview of compliance status and recent activity
+ * Overview of activity and statistics
  */
 export default function DashboardPage() {
 	return (
@@ -21,7 +21,7 @@ export default function DashboardPage() {
 							/>
 						</div>
 						<div>
-							<p className="text-gray-400 text-sm">Total Staff</p>
+							<p className="text-gray-400 text-sm">Total Users</p>
 							<p className="text-2xl font-bold text-white">0</p>
 						</div>
 					</CardHeader>
@@ -30,10 +30,13 @@ export default function DashboardPage() {
 				<Card className="bg-white/5 backdrop-blur-lg border border-white/10">
 					<CardHeader className="flex-row items-center gap-3">
 						<div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center">
-							<Icon icon="mdi:certificate" className="w-6 h-6 text-green-500" />
+							<Icon
+								icon="mdi:check-circle"
+								className="w-6 h-6 text-green-500"
+							/>
 						</div>
 						<div>
-							<p className="text-gray-400 text-sm">Valid Certificates</p>
+							<p className="text-gray-400 text-sm">Active</p>
 							<p className="text-2xl font-bold text-white">0</p>
 						</div>
 					</CardHeader>
@@ -43,12 +46,12 @@ export default function DashboardPage() {
 					<CardHeader className="flex-row items-center gap-3">
 						<div className="w-12 h-12 bg-yellow-500/20 rounded-lg flex items-center justify-center">
 							<Icon
-								icon="mdi:clipboard-check"
+								icon="mdi:clock-outline"
 								className="w-6 h-6 text-yellow-500"
 							/>
 						</div>
 						<div>
-							<p className="text-gray-400 text-sm">Pending Tasks</p>
+							<p className="text-gray-400 text-sm">Pending</p>
 							<p className="text-2xl font-bold text-white">0</p>
 						</div>
 					</CardHeader>
@@ -56,11 +59,11 @@ export default function DashboardPage() {
 
 				<Card className="bg-white/5 backdrop-blur-lg border border-white/10">
 					<CardHeader className="flex-row items-center gap-3">
-						<div className="w-12 h-12 bg-red-500/20 rounded-lg flex items-center justify-center">
-							<Icon icon="mdi:alert" className="w-6 h-6 text-red-500" />
+						<div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
+							<Icon icon="mdi:chart-line" className="w-6 h-6 text-purple-500" />
 						</div>
 						<div>
-							<p className="text-gray-400 text-sm">Overdue Items</p>
+							<p className="text-gray-400 text-sm">Total</p>
 							<p className="text-2xl font-bold text-white">0</p>
 						</div>
 					</CardHeader>
@@ -71,13 +74,12 @@ export default function DashboardPage() {
 			<Card className="bg-white/5 backdrop-blur-lg border border-white/10">
 				<CardHeader>
 					<h2 className="text-xl font-bold text-white">
-						Welcome to Dental Compliance
+						Welcome to Your Dashboard
 					</h2>
 				</CardHeader>
 				<CardContent>
 					<p className="text-gray-300 mb-4">
-						Get started by adding your staff members and uploading their
-						training certificates.
+						Get started by exploring the features of your application.
 					</p>
 					<div className="flex flex-col gap-2 text-gray-400">
 						<div className="flex items-center gap-2">
@@ -86,15 +88,15 @@ export default function DashboardPage() {
 						</div>
 						<div className="flex items-center gap-2">
 							<Icon icon="mdi:check-circle" className="text-green-500" />
-							<span>HTM 01-05 compliance tracking</span>
+							<span>Role-based access control</span>
 						</div>
 						<div className="flex items-center gap-2">
 							<Icon icon="mdi:check-circle" className="text-green-500" />
-							<span>GDC training matrix with traffic light status</span>
+							<span>Secure authentication with Better Auth</span>
 						</div>
 						<div className="flex items-center gap-2">
 							<Icon icon="mdi:check-circle" className="text-green-500" />
-							<span>Automated task generation and reminders</span>
+							<span>Modern UI with Hero UI components</span>
 						</div>
 					</div>
 				</CardContent>

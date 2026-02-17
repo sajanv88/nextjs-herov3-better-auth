@@ -4,11 +4,12 @@ import { Button } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import NextLink from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import useOrg from "@/app/hooks/use-org";
 import { authClient } from "@/app/lib/auth-client";
 
 /**
  * Dashboard Sidebar Navigation
- * Role-based menu items for dental compliance SaaS
+ * Role-based menu items for multi-tenant SaaS
  */
 
 interface NavItem {
@@ -25,44 +26,6 @@ const navItems: NavItem[] = [
 		icon: "mdi:view-dashboard",
 	},
 	{
-		label: "Staffs",
-		href: "/staffs",
-		icon: "mdi:account-group",
-		roles: ["owner", "manager"],
-	},
-	{
-		label: "Training Matrix",
-		href: "/training",
-		icon: "mdi:certificate",
-	},
-	{
-		label: "Certificates",
-		href: "/certificates",
-		icon: "mdi:file-certificate",
-	},
-	{
-		label: "Tasks",
-		href: "/tasks",
-		icon: "mdi:clipboard-check",
-	},
-	{
-		label: "HTM Logs",
-		href: "/htm-logs",
-		icon: "mdi:clipboard-text",
-	},
-	{
-		label: "Policies",
-		href: "/policies",
-		icon: "mdi:file-document",
-		roles: ["owner", "manager"],
-	},
-	{
-		label: "Reports",
-		href: "/reports",
-		icon: "mdi:chart-line",
-		roles: ["owner", "manager"],
-	},
-	{
 		label: "Settings",
 		href: "/settings",
 		icon: "mdi:cog",
@@ -73,7 +36,9 @@ const navItems: NavItem[] = [
 export default function DashboardSidebar() {
 	const pathname = usePathname();
 	const router = useRouter();
+	const { org } = useOrg();
 
+	console.log("Organization data in sidebar:", org);
 	async function handleSignOut() {
 		await authClient.signOut();
 		router.push("/login");
@@ -84,10 +49,8 @@ export default function DashboardSidebar() {
 			{/* Logo */}
 			<div className="p-6 border-b border-gray-800">
 				<div className="flex items-center gap-2">
-					<Icon icon="mdi:tooth" className="w-8 h-8 text-blue-500" />
-					<span className="text-xl font-bold text-white">
-						Dental Compliance
-					</span>
+					<Icon icon="mdi:application" className="w-8 h-8 text-blue-500" />
+					<span className="text-xl font-bold text-white">My App</span>
 				</div>
 			</div>
 

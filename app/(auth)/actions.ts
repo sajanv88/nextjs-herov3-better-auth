@@ -1,23 +1,34 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/app/lib/auth";
+import { prisma } from "@/app/lib/prisma";
 
-type ActionState = {
+type LoginActionState = {
 	error?: string;
+	email?: string;
+} | null;
+
+type RegisterActionState = {
+	error?: string;
+	name?: string;
+	email?: string;
+	organizationName?: string;
 } | null;
 
 export async function loginAction(
-	_prevState: ActionState,
+	_prevState: LoginActionState,
 	formData: FormData,
-): Promise<ActionState> {
+): Promise<LoginActionState> {
 	const email = formData.get("email") as string;
 	const password = formData.get("password") as string;
 
 	if (!email || !password) {
 		return {
 			error: "Email and password are required",
+			email,
 		};
 	}
 
@@ -30,8 +41,6 @@ export async function loginAction(
 			},
 			headers: await headers(),
 		});
-
-		redirect("/dashboard");
 	} catch (error) {
 		console.error("Login error:", error);
 		return {
@@ -39,36 +48,49 @@ export async function loginAction(
 				error instanceof Error
 					? error.message
 					: "Failed to sign in. Please check your credentials.",
+			email,
 		};
 	}
+
+	revalidatePath("/dashboard");
+	redirect("/dashboard");
 }
 
 export async function registerAction(
-	_prevState: ActionState,
+	_prevState: RegisterActionState,
 	formData: FormData,
-): Promise<ActionState> {
+): Promise<RegisterActionState> {
 	const name = formData.get("name") as string;
 	const email = formData.get("email") as string;
 	const password = formData.get("password") as string;
 	const confirmPassword = formData.get("confirmPassword") as string;
-	const practiceName = formData.get("practiceName") as string;
+	const organizationName = formData.get("organizationName") as string;
 
 	// Validation
-	if (!name || !email || !password || !confirmPassword || !practiceName) {
+	if (!name || !email || !password || !confirmPassword || !organizationName) {
 		return {
 			error: "All fields are required",
+			name,
+			email,
+			organizationName,
 		};
 	}
 
 	if (password !== confirmPassword) {
 		return {
 			error: "Passwords do not match",
+			name,
+			email,
+			organizationName,
 		};
 	}
 
 	if (password.length < 8) {
 		return {
 			error: "Password must be at least 8 characters",
+			name,
+			email,
+			organizationName,
 		};
 	}
 
@@ -83,13 +105,35 @@ export async function registerAction(
 			headers: await headers(),
 		});
 
-		if (!signUpResult) {
+		if (!signUpResult?.user) {
 			throw new Error("Failed to create account");
 		}
 
-		// Step 2: Create organization (practice)
-		// Note: This requires the user to be authenticated first
-		// We need to sign in the user after registration
+		// Get the user ID from signup result
+		const userId = signUpResult.user.id;
+
+		// Step 2: Create organization directly using Prisma
+		const orgSlug = organizationName
+			.toLowerCase()
+			.replace(/[^a-z0-9]+/g, "-")
+			.replace(/^-|-$/g, "");
+
+		const organization = await prisma.organization.create({
+			data: {
+				name: organizationName,
+				slug: orgSlug,
+				members: {
+					create: {
+						userId: userId,
+						role: "owner",
+					},
+				},
+			},
+		});
+
+		console.log("Organization created:", organization);
+
+		// Step 3: Sign in the user to establish session
 		await auth.api.signInEmail({
 			body: {
 				email,
@@ -97,21 +141,6 @@ export async function registerAction(
 			},
 			headers: await headers(),
 		});
-
-		// Now create the organization
-		const orgResult = await auth.api.createOrganization({
-			body: {
-				name: practiceName,
-				slug: practiceName.toLowerCase().replace(/\s+/g, "-"),
-			},
-			headers: await headers(),
-		});
-
-		if (!orgResult) {
-			throw new Error("Failed to create practice");
-		}
-
-		redirect("/dashboard");
 	} catch (error) {
 		console.error("Registration error:", error);
 		return {
@@ -119,6 +148,25 @@ export async function registerAction(
 				error instanceof Error
 					? error.message
 					: "Failed to create account. Please try again.",
+			name,
+			email,
+			organizationName,
 		};
 	}
+
+	revalidatePath("/dashboard");
+	redirect("/dashboard");
 }
+
+export const isAuthenticated = async () => {
+	try {
+		const session = await auth.api.getSession({
+			headers: await headers(),
+		});
+		console.log("Auth check session:", session);
+		return !!session?.user;
+	} catch (error) {
+		console.error("Auth check error:", error);
+		return false;
+	}
+};
