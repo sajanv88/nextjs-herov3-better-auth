@@ -1,5 +1,6 @@
 {
-	"mcpServers": {
+    
+	"servers": {
 		"stripe": {
 			"type": "http",
 			"url": "https://mcp.stripe.com"
@@ -13,4 +14,6 @@
 			"url": "https://mcp.inkeep.com/better-auth/mcp"
 		}
 	}
+
+
 }

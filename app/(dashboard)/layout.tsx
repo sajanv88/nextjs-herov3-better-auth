@@ -17,13 +17,15 @@ export default async function DashboardLayout({
 		redirect("/login");
 	}
 	return (
-		<div className="min-h-screen bg-gray-950">
+		<div className="min-h-screen bg-background">
 			<div className="flex">
 				{/* Sidebar */}
 				<DashboardSidebar />
 
-				{/* Main Content */}
-				<main className="flex-1 ml-64 p-8">{children}</main>
+				{/* Main Content — offset for fixed sidebar on desktop, top bar on mobile */}
+				<main className="flex-1 md:ml-64 pt-20 px-5 md:pt-5  w-full min-w-0">
+					<section className="max-w-5xl mx-auto">{children}</section>
+				</main>
 			</div>
 		</div>
 	);
